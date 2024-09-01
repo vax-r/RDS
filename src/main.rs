@@ -32,6 +32,19 @@ impl ListHead {
     }
 
 
+    /**
+     * Insert a new entry between two known consecutive entries.
+     * 
+     * This is only for internal list manipulation where we know
+     * the prev/next entries already!
+     */
+    fn __list_add(new: &Rc<RefCell<Self>>, prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
+        next.borrow_mut().prev = Some(Rc::clone(new));
+        new.borrow_mut().next = Some(Rc::clone(next));
+        new.borrow_mut().prev = Some(Rc::clone(prev));
+        prev.borrow_mut().next = Some(Rc::clone(new));
+    }
+
     /* list_add - add a new entry
      * @new: new entry to be added
      * @head: list head to add it after
@@ -41,11 +54,7 @@ impl ListHead {
      */
     fn list_add(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         let next = head.borrow().next.as_ref().unwrap().clone();
-
-        new.borrow_mut().prev = Some(Rc::clone(head));
-        new.borrow_mut().next = Some(Rc::clone(&next));
-        next.borrow_mut().prev = Some(Rc::clone(new));
-        head.borrow_mut().next = Some(Rc::clone(new));
+        ListHead::__list_add(new, head, &next);
     }
 
 
@@ -59,11 +68,7 @@ impl ListHead {
      */
     fn list_add_tail(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         let prev: Rc<RefCell<ListHead>> = head.borrow().prev.as_ref().unwrap().clone();
-
-        new.borrow_mut().prev = Some(Rc::clone(&prev));
-        new.borrow_mut().next = Some(Rc::clone(head));
-        head.borrow_mut().prev = Some(Rc::clone(new));
-        prev.borrow_mut().next = Some(Rc::clone(new));
+        ListHead::__list_add(new, &prev, head);
     }
 
 }
