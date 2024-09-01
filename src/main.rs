@@ -136,6 +136,20 @@ impl ListHead {
         new.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(new));
     }
 
+
+    /**
+     * list_replace_init - replace old entry by new one and initialize the old one
+     * @old : the element to be replaced
+     * @new : the new element to insert
+     * 
+     * If @old was empty, it will be overwritten.
+     */
+    #[allow(dead_code)]
+    fn list_replace_init(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
+        ListHead::list_replace(old, new);
+        ListHead::init_list_head(old);
+    }
+
 }
 
 
