@@ -23,6 +23,15 @@ impl ListHead {
         node
     }
 
+    /**
+     * list_empty - tests whether a list is empty
+     * @head: the list to test
+     */
+    fn list_empty(head: &Rc<RefCell<Self>>) -> bool {
+        Rc::ptr_eq(head.borrow().next.as_ref().unwrap(), head)
+    }
+
+
     /* list_add - add a new entry
      * @new: new entry to be added
      * @head: list head to add it after
@@ -38,6 +47,7 @@ impl ListHead {
         next.borrow_mut().prev = Some(Rc::clone(new));
         head.borrow_mut().next = Some(Rc::clone(new));
     }
+
 
     /**
      * list_add_tail - add a new entry
@@ -63,6 +73,10 @@ fn main() {
     let first = ListHead::new(1);
     let second = ListHead::new(2);
     let third = ListHead::new(3);
+
+    if ListHead::list_empty(&first) {
+        println!("List empty!")
+    }
 
     ListHead::list_add(&second,&first);
     ListHead::list_add_tail(&third, &first);
