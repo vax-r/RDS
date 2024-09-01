@@ -39,39 +39,43 @@ impl ListHead {
         head.borrow_mut().next = Some(Rc::clone(new));
     }
 
-    fn next_node_value(&self) {
-        match &self.next {
-            Some(node) => {
-                println!("{} -> {}", self.item, node.borrow().item);
-            },
-            None => {},
-        }
+    /**
+     * list_add_tail - add a new entry
+     * @new: new entry to be added
+     * @head: list head to add it before
+     * 
+     * Insert a new entry before the specified head.
+     * This is useful for implementing queues.
+     */
+    fn list_add_tail(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+        let prev: Rc<RefCell<ListHead>> = head.borrow().prev.as_ref().unwrap().clone();
+
+        new.borrow_mut().prev = Some(Rc::clone(&prev));
+        new.borrow_mut().next = Some(Rc::clone(head));
+        head.borrow_mut().prev = Some(Rc::clone(new));
+        prev.borrow_mut().next = Some(Rc::clone(new));
     }
 
-    fn prev_node_value(&self) {
-        match &self.prev {
-            Some(node) => {
-                println!("{} -> {}", self.item, node.borrow().item);
-            },
-            None => {},
-        }
-    }
 }
 
 
 fn main() {
     let first = ListHead::new(1);
     let second = ListHead::new(2);
-    
-    first.borrow().next_node_value();
-    first.borrow().prev_node_value();
-    second.borrow().next_node_value();
-    second.borrow().prev_node_value();
+    let third = ListHead::new(3);
 
-    println!("After insertion");
     ListHead::list_add(&second,&first);
-    first.borrow().next_node_value();
-    first.borrow().prev_node_value();
-    second.borrow().next_node_value();
-    second.borrow().prev_node_value();
+    ListHead::list_add_tail(&third, &first);
+
+    /* Print the linked list forward */
+    let mut current = Some(Rc::clone(&first));
+    while let Some(node) = current {
+        print!("{} -> ", node.borrow().item);
+        current = node.borrow().next.clone();
+        
+        if Rc::ptr_eq(&current.as_ref().unwrap(), &first) {
+            break;
+        }
+    }
+    println!("Finished");
 }
