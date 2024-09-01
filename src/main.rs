@@ -10,6 +10,7 @@ struct ListHead {
 }
 
 impl ListHead {
+    #[allow(dead_code)]
     fn new(num: i32) -> Rc<RefCell<Self>> {
         let node = Rc::new(RefCell::new(ListHead{
             item: num,
@@ -31,6 +32,7 @@ impl ListHead {
      * Initializes the ListHead to point to itself. If it is a list header,
      * the result is an empty list.
      */
+    #[allow(dead_code)]
     fn init_list_head(list: &Rc<RefCell<Self>>) {
         list.borrow_mut().next = Some(Rc::clone(list));
         list.borrow_mut().prev = Some(Rc::clone(list));
@@ -41,6 +43,7 @@ impl ListHead {
      * list_empty - tests whether a list is empty
      * @head: the list to test
      */
+    #[allow(dead_code)]
     fn list_empty(head: &Rc<RefCell<Self>>) -> bool {
         Rc::ptr_eq(head.borrow().next.as_ref().unwrap(), head)
     }
@@ -67,6 +70,7 @@ impl ListHead {
      * Insert a new entry after the specified head.
      * This is good for implementing stacks.
      */
+    #[allow(dead_code)]
     fn list_add(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         let next = head.borrow().next.as_ref().unwrap().clone();
         ListHead::__list_add(new, head, &next);
@@ -81,6 +85,7 @@ impl ListHead {
      * Insert a new entry before the specified head.
      * This is useful for implementing queues.
      */
+    #[allow(dead_code)]
     fn list_add_tail(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         let prev: Rc<RefCell<ListHead>> = head.borrow().prev.as_ref().unwrap().clone();
         ListHead::__list_add(new, &prev, head);
@@ -109,6 +114,7 @@ impl ListHead {
      * list_del_init - deletes entry from list and reinitialize it.
      * @entry: the element to delete from the list.
      */
+    #[allow(dead_code)]
     fn list_del_init(entry: &Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(entry);
         ListHead::init_list_head(entry);
@@ -122,6 +128,7 @@ impl ListHead {
      * 
      * If @old was empty, it will be overwritten.
      */
+    #[allow(dead_code)]
     fn list_replace(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
         new.borrow_mut().next = Some(Rc::clone(old.borrow().next.as_ref().unwrap()));
         new.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(new));
