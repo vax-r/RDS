@@ -114,6 +114,21 @@ impl ListHead {
         ListHead::init_list_head(entry);
     }
 
+
+    /**
+     * list_replace - replace old entry by new one
+     * @old : the element to be replaced
+     * @new : the new element to insert
+     * 
+     * If @old was empty, it will be overwritten.
+     */
+    fn list_replace(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
+        new.borrow_mut().next = Some(Rc::clone(old.borrow().next.as_ref().unwrap()));
+        new.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(new));
+        new.borrow_mut().prev = Some(Rc::clone(old.borrow().prev.as_ref().unwrap()));
+        new.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(new));
+    }
+
 }
 
 
@@ -129,6 +144,7 @@ fn main() {
     ListHead::list_add(&second,&first);
     ListHead::list_add_tail(&third, &first);
     ListHead::list_del_init(&second);
+    ListHead::list_replace(&third, &second);
 
     /* Print the linked list forward */
     let mut current = Some(Rc::clone(&first));
