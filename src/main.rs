@@ -23,6 +23,7 @@ impl ListHead {
         node
     }
 
+
     /**
      * list_empty - tests whether a list is empty
      * @head: the list to test
@@ -44,6 +45,7 @@ impl ListHead {
         new.borrow_mut().prev = Some(Rc::clone(prev));
         prev.borrow_mut().next = Some(Rc::clone(new));
     }
+
 
     /* list_add - add a new entry
      * @new: new entry to be added
@@ -71,6 +73,35 @@ impl ListHead {
         ListHead::__list_add(new, &prev, head);
     }
 
+
+    /**
+     * Delete a list entry by making the prev/next entries
+     * point to each other.
+     * 
+     * This is only for internal list manipulation where we know
+     * the prev/next entries already!
+     */
+    fn __list_del(prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
+        next.borrow_mut().prev = Some(Rc::clone(prev));
+        prev.borrow_mut().next = Some(Rc::clone(next));
+    }
+
+
+    fn __list_del_entry(entry: &Rc<RefCell<Self>>) {
+        ListHead::__list_del(entry.borrow().prev.as_ref().unwrap(), entry.borrow().next.as_ref().unwrap());
+    }
+
+
+    /**
+     * list_del_init - deletes entry from list and reinitialize it.
+     * @entry: the element to delete from the list.
+     */
+    fn list_del_init(entry: &Rc<RefCell<Self>>) {
+        ListHead::__list_del_entry(entry);
+        entry.borrow_mut().next = Some(Rc::clone(entry));
+        entry.borrow_mut().prev = Some(Rc::clone(entry));
+    }
+
 }
 
 
@@ -85,6 +116,7 @@ fn main() {
 
     ListHead::list_add(&second,&first);
     ListHead::list_add_tail(&third, &first);
+    ListHead::list_del_init(&second);
 
     /* Print the linked list forward */
     let mut current = Some(Rc::clone(&first));
