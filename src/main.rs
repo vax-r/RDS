@@ -25,6 +25,19 @@ impl ListHead {
 
 
     /**
+     * init_list_head - Initialize a ListHead structure
+     * @list: ListHead structure to be initialized.
+     * 
+     * Initializes the ListHead to point to itself. If it is a list header,
+     * the result is an empty list.
+     */
+    fn init_list_head(list: &Rc<RefCell<Self>>) {
+        list.borrow_mut().next = Some(Rc::clone(list));
+        list.borrow_mut().prev = Some(Rc::clone(list));
+    }
+
+
+    /**
      * list_empty - tests whether a list is empty
      * @head: the list to test
      */
@@ -98,8 +111,7 @@ impl ListHead {
      */
     fn list_del_init(entry: &Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(entry);
-        entry.borrow_mut().next = Some(Rc::clone(entry));
-        entry.borrow_mut().prev = Some(Rc::clone(entry));
+        ListHead::init_list_head(entry);
     }
 
 }
