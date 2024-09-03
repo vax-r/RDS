@@ -194,3 +194,18 @@ impl ListHead {
     }
 
 }
+
+
+/* Sections for Unit tests */
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let list = ListHead::new(1);
+
+        assert_eq!(list.borrow().item, 1);
+        assert!(ListHead::list_empty(&list));
+    }
+}
