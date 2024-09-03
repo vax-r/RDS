@@ -208,4 +208,18 @@ mod tests {
         assert_eq!(list.borrow().item, 1);
         assert!(ListHead::list_empty(&list));
     }
+
+    #[test]
+    fn test_init_list_head() {
+        let list =  Rc::new(RefCell::new(ListHead{
+            item: 1,
+            prev: None,
+            next: None,
+        }));
+
+        ListHead::init_list_head(&list);
+
+        assert_eq!(list.borrow().item, 1);
+        assert!(ListHead::list_empty(&list));
+    }
 }
