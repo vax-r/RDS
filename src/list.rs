@@ -235,4 +235,19 @@ mod tests {
         assert!(ListHead::list_empty(&list1));
         assert!(!ListHead::list_empty(&list2));
     }
+
+
+    #[test]
+    fn test_list_add() {
+        let a = ListHead::new(0);
+        let b = ListHead::new(0);
+        let list = ListHead::new(0);
+
+        ListHead::list_add(&a, &list);
+        ListHead::list_add(&b, &list);
+
+        assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &b));
+        assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &list));
+        assert!(Rc::ptr_eq(b.borrow().next.as_ref().unwrap(), &a));
+    }
 }
