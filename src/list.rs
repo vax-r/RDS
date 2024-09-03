@@ -169,4 +169,28 @@ impl ListHead {
         ListHead::list_add(entry1, &pos);
     }
 
+
+    /**
+     * list_move - delete from one list and add as another's head
+     * @list: the entry to move
+     * @head: the head that will precede our entry
+     */
+    #[allow(dead_code)]
+    pub fn list_move(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+        ListHead::__list_del_entry(list);
+        ListHead::list_add(list, head);
+    }
+
+
+    /**
+     * list_move_tail - delete from one list and add as another's tail
+     * @list: the entry to move
+     * @head: the head that will follow our entry
+     */
+    #[allow(dead_code)]
+    pub fn list_move_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+        ListHead::__list_del_entry(list);
+        ListHead::list_add_tail(list, head);
+    }
+
 }
