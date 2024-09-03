@@ -209,6 +209,7 @@ mod tests {
         assert!(ListHead::list_empty(&list));
     }
 
+
     #[test]
     fn test_init_list_head() {
         let list =  Rc::new(RefCell::new(ListHead{
@@ -221,5 +222,17 @@ mod tests {
 
         assert_eq!(list.borrow().item, 1);
         assert!(ListHead::list_empty(&list));
+    }
+
+
+    #[test]
+    fn test_list_empty() {
+        let list1 = ListHead::new(1);
+        let list2 = ListHead::new(2);
+
+        ListHead::list_add_tail(&list2, &ListHead::new(3));
+
+        assert!(ListHead::list_empty(&list1));
+        assert!(!ListHead::list_empty(&list2));
     }
 }
