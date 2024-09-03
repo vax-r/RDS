@@ -150,6 +150,25 @@ impl ListHead {
         ListHead::init_list_head(old);
     }
 
+
+    /**
+     * list_swap - replace entry1 with entry2 and re-add entry1 at entry2's position
+     * @entry1: the location to place entry2
+     * @entry2: the location to place entry1
+     */
+    #[allow(dead_code)]
+    fn list_swap(entry1: &Rc<RefCell<Self>>, entry2: &Rc<RefCell<Self>>) {
+        let mut pos = &entry2.borrow_mut().prev.as_ref().unwrap().clone();
+
+        ListHead::list_del_init(entry2);
+        ListHead::list_replace(entry1, entry2);
+
+        if Rc::ptr_eq(&pos, &entry1) {
+            pos = entry2;
+        }
+        ListHead::list_add(entry1, &pos);
+    }
+
 }
 
 
