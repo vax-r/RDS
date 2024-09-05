@@ -204,6 +204,17 @@ impl ListHead {
 
 
     /**
+     * list_splice - join two lists, this is designed for stacks
+     * @list: the new list to add.
+     * @head: the place to add it in the first list.
+     */
+    pub fn list_splice(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+        if !ListHead::list_empty(list) {
+            ListHead::__list_splice(list, head, head.borrow().next.as_ref().unwrap());
+        }
+    }
+
+    /**
      * list_splice_tail - join two lists, each list being a queue
      * @list: the new list to add
      * @head: the place to add it in the first list.
