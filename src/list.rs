@@ -193,6 +193,26 @@ impl ListHead {
         ListHead::list_add_tail(list, head);
     }
 
+
+    fn __list_splice(list: &Rc<RefCell<Self>>, prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
+        list.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(prev));
+        prev.borrow_mut().next = Some(Rc::clone(list.borrow().next.as_ref().unwrap()));
+
+        list.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(next));
+        next.borrow_mut().prev = Some(Rc::clone(list.borrow().prev.as_ref().unwrap()));
+    }
+
+
+    /**
+     * list_splice_tail - join two lists, each list being a queue
+     * @list: the new list to add
+     * @head: the place to add it in the first list.
+     */
+    pub fn list_splice_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+        if !ListHead::list_empty(list) {
+            ListHead::__list_splice(list, head.borrow().prev.as_ref().unwrap(), head);
+        }
+    }
 }
 
 
