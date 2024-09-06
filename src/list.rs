@@ -1,6 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, cmp::Ordering, rc::Rc};
 
 type Link<T> = Option<Rc<RefCell<T>>>;
+type ListCmpFunc = fn(&Rc<RefCell<ListHead>>, &Rc<RefCell<ListHead>>) -> Ordering;
 
 /*TODO: struct members should be private */
 pub struct ListHead {
@@ -224,6 +225,76 @@ impl ListHead {
             ListHead::__list_splice(list, head.borrow().prev.as_ref().unwrap(), head);
         }
     }
+
+
+    /* TODO: Refactor in the future, too much duplicated code */
+    pub fn merge(cmp: ListCmpFunc, mut a: Link<Self>, mut b: Link<Self>) -> Link<ListHead> {
+        let head = Some(ListHead::new(0));
+
+        loop {
+            match (a.clone(), b.clone()) {
+                (Some(ref a_node), Some(ref b_node )) => {
+                    if cmp(a_node, b_node) != Ordering::Greater {
+                        let a_next = a_node.borrow().next.clone();
+                        let a_prev = a_node.borrow().prev.clone();
+                        
+                        if let Some(next) = a_next.as_ref() {
+                            next.borrow_mut().prev = None;
+                        }
+                        if let Some(prev) = a_prev.as_ref() {
+                            prev.borrow_mut().next = None;
+                        }
+                        ListHead::list_add_tail(a_node, head.as_ref().unwrap());
+                        a = a_next.clone();
+                    } else {
+                        let b_next = b_node.borrow().next.clone();
+                        let b_prev = b_node.borrow().prev.clone();
+
+                        if let Some(next) = b_next.as_ref() {
+                            next.borrow_mut().prev = None;
+                        }
+                        if let Some(prev) = b_prev.as_ref() {
+                            prev.borrow_mut().next = None;
+                        }
+                        ListHead::list_add_tail(b_node, head.as_ref().unwrap());
+                        b = b_next.clone();
+                    }
+                }
+                (Some(ref a_node), None) => {
+                    let a_next = a_node.borrow().next.clone();
+                    let a_prev = a_node.borrow().prev.clone();
+                    
+                    if let Some(next) = a_next.as_ref() {
+                        next.borrow_mut().prev = None;
+                    }
+                    if let Some(prev) = a_prev.as_ref() {
+                        prev.borrow_mut().next = None;
+                    }
+                    ListHead::list_add_tail(a_node, head.as_ref().unwrap());
+                    a = a_next.clone();
+                }
+                (None, Some(ref b_node)) => {
+                    let b_next = b_node.borrow().next.clone();
+                    let b_prev = b_node.borrow().prev.clone();
+
+                    if let Some(next) = b_next.as_ref() {
+                        next.borrow_mut().prev = None;
+                    }
+                    if let Some(prev) = b_prev.as_ref() {
+                        prev.borrow_mut().next = None;
+                    }
+                    ListHead::list_add_tail(b_node, head.as_ref().unwrap());
+                    b = b_next.clone();
+                }
+                (None, None) => break,
+            }
+        }
+
+        let true_head = head.as_ref().unwrap().borrow().next.clone();
+        ListHead::list_del_init(head.as_ref().unwrap());
+        true_head
+    }
+
 }
 
 
