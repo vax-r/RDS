@@ -177,7 +177,7 @@ impl ListHead {
      * @head: the head that will precede our entry
      */
     #[allow(dead_code)]
-    pub fn list_move(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+    pub fn list_move(list: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(list.clone());
         ListHead::list_add(list.clone(), head.clone());
     }
@@ -458,7 +458,7 @@ mod tests {
         ListHead::list_add_tail(a.clone(), list1.clone());
         ListHead::list_add_tail(b.clone(), list2.clone());
 
-        ListHead::list_move(&a, &list2);
+        ListHead::list_move(a.clone(), list2.clone());
 
         assert!(ListHead::list_empty(list1.clone()));
 
