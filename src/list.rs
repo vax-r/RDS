@@ -34,9 +34,9 @@ impl ListHead {
      * the result is an empty list.
      */
     #[allow(dead_code)]
-    pub fn init_list_head(list: &Rc<RefCell<Self>>) {
-        list.borrow_mut().next = Some(Rc::clone(list));
-        list.borrow_mut().prev = Some(Rc::clone(list));
+    pub fn init_list_head(list: Rc<RefCell<Self>>) {
+        list.borrow_mut().next = Some(Rc::clone(&list));
+        list.borrow_mut().prev = Some(Rc::clone(&list));
     }
 
 
@@ -118,7 +118,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_del_init(entry: &Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(entry);
-        ListHead::init_list_head(entry);
+        ListHead::init_list_head(entry.clone());
     }
 
 
@@ -148,7 +148,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_replace_init(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
         ListHead::list_replace(old, new);
-        ListHead::init_list_head(old);
+        ListHead::init_list_head(old.clone());
     }
 
 
@@ -320,7 +320,7 @@ mod tests {
             next: None,
         }));
 
-        ListHead::init_list_head(&list);
+        ListHead::init_list_head(list.clone());
 
         assert_eq!(list.borrow().item, 1);
         assert!(ListHead::list_empty(&list));
