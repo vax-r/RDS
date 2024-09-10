@@ -9,7 +9,7 @@ fn main() {
     let second = ListHead::new(2);
     let third = ListHead::new(3);
 
-    if ListHead::list_empty(&first) {
+    if ListHead::list_empty(first.clone()) {
         println!("List empty!")
     }
 

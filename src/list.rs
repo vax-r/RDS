@@ -45,8 +45,8 @@ impl ListHead {
      * @head: the list to test
      */
     #[allow(dead_code)]
-    pub fn list_empty(head: &Rc<RefCell<Self>>) -> bool {
-        Rc::ptr_eq(head.borrow().next.as_ref().unwrap(), head)
+    pub fn list_empty(head: Rc<RefCell<Self>>) -> bool {
+        Rc::ptr_eq(head.borrow().next.as_ref().unwrap(), &head)
     }
 
 
@@ -210,7 +210,7 @@ impl ListHead {
      * @head: the place to add it in the first list.
      */
     pub fn list_splice(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
-        if !ListHead::list_empty(list) {
+        if !ListHead::list_empty(list.clone()) {
             ListHead::__list_splice(list, head, head.borrow().next.as_ref().unwrap());
         }
     }
@@ -221,7 +221,7 @@ impl ListHead {
      * @head: the place to add it in the first list.
      */
     pub fn list_splice_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
-        if !ListHead::list_empty(list) {
+        if !ListHead::list_empty(list.clone()) {
             ListHead::__list_splice(list, head.borrow().prev.as_ref().unwrap(), head);
         }
     }
@@ -308,7 +308,7 @@ mod tests {
         let list = ListHead::new(1);
 
         assert_eq!(list.borrow().item, 1);
-        assert!(ListHead::list_empty(&list));
+        assert!(ListHead::list_empty(list.clone()));
     }
 
 
@@ -323,7 +323,7 @@ mod tests {
         ListHead::init_list_head(list.clone());
 
         assert_eq!(list.borrow().item, 1);
-        assert!(ListHead::list_empty(&list));
+        assert!(ListHead::list_empty(list.clone()));
     }
 
 
@@ -334,8 +334,8 @@ mod tests {
 
         ListHead::list_add_tail(&list2, &ListHead::new(3));
 
-        assert!(ListHead::list_empty(&list1));
-        assert!(!ListHead::list_empty(&list2));
+        assert!(ListHead::list_empty(list1.clone()));
+        assert!(!ListHead::list_empty(list2.clone()));
     }
 
 
