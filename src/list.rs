@@ -146,7 +146,7 @@ impl ListHead {
      * If @old was empty, it will be overwritten.
      */
     #[allow(dead_code)]
-    pub fn list_replace_init(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
+    pub fn list_replace_init(old: Rc<RefCell<Self>>, new: Rc<RefCell<Self>>) {
         ListHead::list_replace(old.clone(), new.clone());
         ListHead::init_list_head(old.clone());
     }
@@ -415,7 +415,7 @@ mod tests {
         ListHead::list_add_tail(a_old.clone(), list.clone());
         ListHead::list_add_tail(b.clone(), list.clone());
 
-        ListHead::list_replace_init(&a_old, &a_new);
+        ListHead::list_replace_init(a_old.clone(), a_new.clone());
 
         assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &a_new));
         assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &a_new));
