@@ -403,4 +403,25 @@ mod tests {
         assert!(Rc::ptr_eq(a_new.borrow().next.as_ref().unwrap(), &b));
         assert!(Rc::ptr_eq(a_new.borrow().prev.as_ref().unwrap(), &list));
     }
+
+
+    #[test]
+    fn test_list_replace_init() {
+        let a_old = ListHead::new(0);
+        let a_new = ListHead::new(0);
+        let b = ListHead::new(0);
+        let list = ListHead::new(0);
+
+        ListHead::list_add_tail(a_old.clone(), list.clone());
+        ListHead::list_add_tail(b.clone(), list.clone());
+
+        ListHead::list_replace_init(&a_old, &a_new);
+
+        assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &a_new));
+        assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &a_new));
+        assert!(Rc::ptr_eq(a_new.borrow().next.as_ref().unwrap(), &b));
+        assert!(Rc::ptr_eq(a_new.borrow().prev.as_ref().unwrap(), &list));
+
+        assert!(ListHead::list_empty(a_old.clone()));
+    }
 }
