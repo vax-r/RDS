@@ -74,7 +74,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_add(new: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         let next = head.borrow().next.as_ref().unwrap().clone();
-        ListHead::__list_add(new, head, next);
+        ListHead::__list_add(new.clone(), head.clone(), next);
     }
 
 
@@ -89,7 +89,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_add_tail(new: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         let prev: Rc<RefCell<ListHead>> = head.borrow().prev.as_ref().unwrap().clone();
-        ListHead::__list_add(new, prev, head);
+        ListHead::__list_add(new.clone(), prev, head.clone());
     }
 
 
@@ -366,5 +366,22 @@ mod tests {
         assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &a));
         assert!(Rc::ptr_eq(a.borrow().prev.as_ref().unwrap(), &list));
         assert!(Rc::ptr_eq(a.borrow().next.as_ref().unwrap(), &b));
+    }
+
+
+    #[test]
+    fn test_list_del_init() {
+        let a = ListHead::new(0);
+        let b = ListHead::new(0);
+        let list = ListHead::new(0);
+
+        ListHead::list_add_tail(a.clone(), list.clone());
+        ListHead::list_add_tail(b.clone(), list.clone());
+
+        ListHead::list_del_init(&a);
+
+        assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &b));
+        assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &list));
+        assert!(ListHead::list_empty(a.clone()));
     }
 }
