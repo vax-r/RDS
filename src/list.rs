@@ -158,14 +158,14 @@ impl ListHead {
      * @entry2: the location to place entry1
      */
     #[allow(dead_code)]
-    pub fn list_swap(entry1: &Rc<RefCell<Self>>, entry2: &Rc<RefCell<Self>>) {
+    pub fn list_swap(entry1: Rc<RefCell<Self>>, entry2: Rc<RefCell<Self>>) {
         let mut pos = &entry2.borrow_mut().prev.as_ref().unwrap().clone();
 
         ListHead::list_del_init(entry2.clone());
         ListHead::list_replace(entry1.clone(), entry2.clone());
 
         if Rc::ptr_eq(&pos, &entry1) {
-            pos = entry2;
+            pos = &entry2;
         }
         ListHead::list_add(entry1.clone(), pos.clone());
     }
@@ -435,7 +435,7 @@ mod tests {
         ListHead::list_add_tail(a.clone(), list.clone());
         ListHead::list_add_tail(b.clone(), list.clone());
 
-        ListHead::list_swap(&a, &b);
+        ListHead::list_swap(a.clone(), b.clone());
 
         assert!(Rc::ptr_eq(&b, list.borrow().next.as_ref().unwrap()));
         assert!(Rc::ptr_eq(&a, list.borrow().prev.as_ref().unwrap()));
