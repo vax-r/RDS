@@ -446,4 +446,23 @@ mod tests {
         assert!(Rc::ptr_eq(&list, a.borrow().next.as_ref().unwrap()));
         assert!(Rc::ptr_eq(&b, a.borrow().prev.as_ref().unwrap()));
     }
+
+
+    #[test]
+    fn test_list_move() {
+        let a = ListHead::new(0);
+        let b = ListHead::new(0);
+        let list1 = ListHead::new(0);
+        let list2 = ListHead::new(0);
+
+        ListHead::list_add_tail(a.clone(), list1.clone());
+        ListHead::list_add_tail(b.clone(), list2.clone());
+
+        ListHead::list_move(&a, &list2);
+
+        assert!(ListHead::list_empty(list1.clone()));
+
+        assert!(Rc::ptr_eq(&a, list2.borrow().next.as_ref().unwrap()));
+        assert!(Rc::ptr_eq(&b, a.borrow().next.as_ref().unwrap()));
+    }
 }
