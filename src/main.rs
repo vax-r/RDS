@@ -15,7 +15,7 @@ fn main() {
 
     ListHead::list_add(second.clone(),first.clone());
     ListHead::list_add_tail(third.clone(), first.clone());
-    ListHead::list_del_init(&second);
+    ListHead::list_del_init(second.clone());
     ListHead::list_replace(&third, &second);
 
     /* Print the linked list forward */

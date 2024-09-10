@@ -100,14 +100,14 @@ impl ListHead {
      * This is only for internal list manipulation where we know
      * the prev/next entries already!
      */
-    fn __list_del(prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
-        next.borrow_mut().prev = Some(Rc::clone(prev));
-        prev.borrow_mut().next = Some(Rc::clone(next));
+    fn __list_del(prev: Rc<RefCell<Self>>, next: Rc<RefCell<Self>>) {
+        next.borrow_mut().prev = Some(Rc::clone(&prev));
+        prev.borrow_mut().next = Some(Rc::clone(&next));
     }
 
 
-    fn __list_del_entry(entry: &Rc<RefCell<Self>>) {
-        ListHead::__list_del(entry.borrow().prev.as_ref().unwrap(), entry.borrow().next.as_ref().unwrap());
+    fn __list_del_entry(entry: Rc<RefCell<Self>>) {
+        ListHead::__list_del(entry.borrow().prev.clone().unwrap(), entry.borrow().next.clone().unwrap());
     }
 
 
@@ -116,8 +116,8 @@ impl ListHead {
      * @entry: the element to delete from the list.
      */
     #[allow(dead_code)]
-    pub fn list_del_init(entry: &Rc<RefCell<Self>>) {
-        ListHead::__list_del_entry(entry);
+    pub fn list_del_init(entry: Rc<RefCell<Self>>) {
+        ListHead::__list_del_entry(entry.clone());
         ListHead::init_list_head(entry.clone());
     }
 
@@ -161,7 +161,7 @@ impl ListHead {
     pub fn list_swap(entry1: &Rc<RefCell<Self>>, entry2: &Rc<RefCell<Self>>) {
         let mut pos = &entry2.borrow_mut().prev.as_ref().unwrap().clone();
 
-        ListHead::list_del_init(entry2);
+        ListHead::list_del_init(entry2.clone());
         ListHead::list_replace(entry1, entry2);
 
         if Rc::ptr_eq(&pos, &entry1) {
@@ -178,7 +178,7 @@ impl ListHead {
      */
     #[allow(dead_code)]
     pub fn list_move(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
-        ListHead::__list_del_entry(list);
+        ListHead::__list_del_entry(list.clone());
         ListHead::list_add(list.clone(), head.clone());
     }
 
@@ -190,7 +190,7 @@ impl ListHead {
      */
     #[allow(dead_code)]
     pub fn list_move_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
-        ListHead::__list_del_entry(list);
+        ListHead::__list_del_entry(list.clone());
         ListHead::list_add_tail(list.clone(), head.clone());
     }
 
@@ -291,7 +291,7 @@ impl ListHead {
         }
 
         let true_head = head.as_ref().unwrap().borrow().next.clone();
-        ListHead::list_del_init(head.as_ref().unwrap());
+        ListHead::list_del_init(head.clone().unwrap());
         true_head
     }
 
@@ -378,7 +378,7 @@ mod tests {
         ListHead::list_add_tail(a.clone(), list.clone());
         ListHead::list_add_tail(b.clone(), list.clone());
 
-        ListHead::list_del_init(&a);
+        ListHead::list_del_init(a.clone());
 
         assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &b));
         assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &list));
