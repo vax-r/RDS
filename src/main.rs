@@ -16,7 +16,7 @@ fn main() {
     ListHead::list_add(second.clone(),first.clone());
     ListHead::list_add_tail(third.clone(), first.clone());
     ListHead::list_del_init(second.clone());
-    ListHead::list_replace(&third, &second);
+    ListHead::list_replace(third.clone(), second.clone());
 
     /* Print the linked list forward */
     let mut current = Some(Rc::clone(&first));

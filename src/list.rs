@@ -130,11 +130,11 @@ impl ListHead {
      * If @old was empty, it will be overwritten.
      */
     #[allow(dead_code)]
-    pub fn list_replace(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
+    pub fn list_replace(old: Rc<RefCell<Self>>, new: Rc<RefCell<Self>>) {
         new.borrow_mut().next = Some(Rc::clone(old.borrow().next.as_ref().unwrap()));
-        new.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(new));
+        new.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(&new));
         new.borrow_mut().prev = Some(Rc::clone(old.borrow().prev.as_ref().unwrap()));
-        new.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(new));
+        new.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(&new));
     }
 
 
@@ -147,7 +147,7 @@ impl ListHead {
      */
     #[allow(dead_code)]
     pub fn list_replace_init(old: &Rc<RefCell<Self>>, new: &Rc<RefCell<Self>>) {
-        ListHead::list_replace(old, new);
+        ListHead::list_replace(old.clone(), new.clone());
         ListHead::init_list_head(old.clone());
     }
 
@@ -162,7 +162,7 @@ impl ListHead {
         let mut pos = &entry2.borrow_mut().prev.as_ref().unwrap().clone();
 
         ListHead::list_del_init(entry2.clone());
-        ListHead::list_replace(entry1, entry2);
+        ListHead::list_replace(entry1.clone(), entry2.clone());
 
         if Rc::ptr_eq(&pos, &entry1) {
             pos = entry2;
@@ -396,7 +396,7 @@ mod tests {
         ListHead::list_add_tail(a_old.clone(), list.clone());
         ListHead::list_add_tail(b.clone(), list.clone());
 
-        ListHead::list_replace(&a_old, &a_new);
+        ListHead::list_replace(a_old.clone(), a_new.clone());
 
         assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &a_new));
         assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &a_new));
