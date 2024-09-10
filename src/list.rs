@@ -424,4 +424,26 @@ mod tests {
 
         assert!(ListHead::list_empty(a_old.clone()));
     }
+
+
+    #[test]
+    fn test_list_swap() {
+        let a = ListHead::new(0);
+        let b = ListHead::new(0);
+        let list = ListHead::new(0);
+
+        ListHead::list_add_tail(a.clone(), list.clone());
+        ListHead::list_add_tail(b.clone(), list.clone());
+
+        ListHead::list_swap(&a, &b);
+
+        assert!(Rc::ptr_eq(&b, list.borrow().next.as_ref().unwrap()));
+        assert!(Rc::ptr_eq(&a, list.borrow().prev.as_ref().unwrap()));
+
+        assert!(Rc::ptr_eq(&a, b.borrow().next.as_ref().unwrap()));
+        assert!(Rc::ptr_eq(&list, b.borrow().prev.as_ref().unwrap()));
+
+        assert!(Rc::ptr_eq(&list, a.borrow().next.as_ref().unwrap()));
+        assert!(Rc::ptr_eq(&b, a.borrow().prev.as_ref().unwrap()));
+    }
 }
