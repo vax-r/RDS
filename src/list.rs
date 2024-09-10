@@ -56,11 +56,11 @@ impl ListHead {
      * This is only for internal list manipulation where we know
      * the prev/next entries already!
      */
-    fn __list_add(new: &Rc<RefCell<Self>>, prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
-        next.borrow_mut().prev = Some(Rc::clone(new));
-        new.borrow_mut().next = Some(Rc::clone(next));
-        new.borrow_mut().prev = Some(Rc::clone(prev));
-        prev.borrow_mut().next = Some(Rc::clone(new));
+    fn __list_add(new: Rc<RefCell<Self>>, prev: Rc<RefCell<Self>>, next: Rc<RefCell<Self>>) {
+        next.borrow_mut().prev = Some(Rc::clone(&new));
+        new.borrow_mut().next = Some(Rc::clone(&next));
+        new.borrow_mut().prev = Some(Rc::clone(&prev));
+        prev.borrow_mut().next = Some(Rc::clone(&new));
     }
 
 
@@ -72,9 +72,9 @@ impl ListHead {
      * This is good for implementing stacks.
      */
     #[allow(dead_code)]
-    pub fn list_add(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+    pub fn list_add(new: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         let next = head.borrow().next.as_ref().unwrap().clone();
-        ListHead::__list_add(new, head, &next);
+        ListHead::__list_add(new, head, next);
     }
 
 
@@ -87,9 +87,9 @@ impl ListHead {
      * This is useful for implementing queues.
      */
     #[allow(dead_code)]
-    pub fn list_add_tail(new: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+    pub fn list_add_tail(new: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         let prev: Rc<RefCell<ListHead>> = head.borrow().prev.as_ref().unwrap().clone();
-        ListHead::__list_add(new, &prev, head);
+        ListHead::__list_add(new, prev, head);
     }
 
 
@@ -167,7 +167,7 @@ impl ListHead {
         if Rc::ptr_eq(&pos, &entry1) {
             pos = entry2;
         }
-        ListHead::list_add(entry1, &pos);
+        ListHead::list_add(entry1.clone(), pos.clone());
     }
 
 
@@ -179,7 +179,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_move(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(list);
-        ListHead::list_add(list, head);
+        ListHead::list_add(list.clone(), head.clone());
     }
 
 
@@ -191,7 +191,7 @@ impl ListHead {
     #[allow(dead_code)]
     pub fn list_move_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
         ListHead::__list_del_entry(list);
-        ListHead::list_add_tail(list, head);
+        ListHead::list_add_tail(list.clone(), head.clone());
     }
 
 
@@ -244,7 +244,7 @@ impl ListHead {
                         if let Some(prev) = a_prev.as_ref() {
                             prev.borrow_mut().next = None;
                         }
-                        ListHead::list_add_tail(a_node, head.as_ref().unwrap());
+                        ListHead::list_add_tail(a_node.clone(), head.as_ref().unwrap().clone());
                         a = a_next.clone();
                     } else {
                         let b_next = b_node.borrow().next.clone();
@@ -256,7 +256,7 @@ impl ListHead {
                         if let Some(prev) = b_prev.as_ref() {
                             prev.borrow_mut().next = None;
                         }
-                        ListHead::list_add_tail(b_node, head.as_ref().unwrap());
+                        ListHead::list_add_tail(b_node.clone(), head.as_ref().unwrap().clone());
                         b = b_next.clone();
                     }
                 }
@@ -270,7 +270,7 @@ impl ListHead {
                     if let Some(prev) = a_prev.as_ref() {
                         prev.borrow_mut().next = None;
                     }
-                    ListHead::list_add_tail(a_node, head.as_ref().unwrap());
+                    ListHead::list_add_tail(a_node.clone(), head.as_ref().unwrap().clone());
                     a = a_next.clone();
                 }
                 (None, Some(ref b_node)) => {
@@ -283,7 +283,7 @@ impl ListHead {
                     if let Some(prev) = b_prev.as_ref() {
                         prev.borrow_mut().next = None;
                     }
-                    ListHead::list_add_tail(b_node, head.as_ref().unwrap());
+                    ListHead::list_add_tail(b_node.clone(), head.as_ref().unwrap().clone());
                     b = b_next.clone();
                 }
                 (None, None) => break,
@@ -332,7 +332,7 @@ mod tests {
         let list1 = ListHead::new(1);
         let list2 = ListHead::new(2);
 
-        ListHead::list_add_tail(&list2, &ListHead::new(3));
+        ListHead::list_add_tail(list2.clone(), ListHead::new(3));
 
         assert!(ListHead::list_empty(list1.clone()));
         assert!(!ListHead::list_empty(list2.clone()));
@@ -345,8 +345,8 @@ mod tests {
         let b = ListHead::new(0);
         let list = ListHead::new(0);
 
-        ListHead::list_add(&a, &list);
-        ListHead::list_add(&b, &list);
+        ListHead::list_add(a.clone(), list.clone());
+        ListHead::list_add(b.clone(), list.clone());
 
         assert!(Rc::ptr_eq(list.borrow().next.as_ref().unwrap(), &b));
         assert!(Rc::ptr_eq(b.borrow().prev.as_ref().unwrap(), &list));

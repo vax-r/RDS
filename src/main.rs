@@ -13,8 +13,8 @@ fn main() {
         println!("List empty!")
     }
 
-    ListHead::list_add(&second,&first);
-    ListHead::list_add_tail(&third, &first);
+    ListHead::list_add(second.clone(),first.clone());
+    ListHead::list_add_tail(third.clone(), first.clone());
     ListHead::list_del_init(&second);
     ListHead::list_replace(&third, &second);
 
