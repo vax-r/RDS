@@ -245,6 +245,20 @@ impl ListHead {
     }
 
 
+    pub fn list_show(head: Rc<RefCell<Self>>) {
+        let mut current = Some(Rc::clone(&head.borrow().next.as_ref().unwrap()));
+        while let Some(node) = current {
+            print!("{} -> ", node.borrow().item);
+            current = node.borrow().next.clone();
+            
+            if Rc::ptr_eq(&current.as_ref().unwrap(), &head) {
+                break;
+            }
+        }
+        println!("Finished");
+    }
+
+    
     /* TODO: Refactor in the future, too much duplicated code */
     pub fn merge(cmp: ListCmpFunc, mut a: Link<Self>, mut b: Link<Self>) -> Link<ListHead> {
         let head = Some(ListHead::new(0));
@@ -293,9 +307,7 @@ impl ListHead {
             }
         }
 
-        let true_head = head.as_ref().unwrap().borrow().next.clone();
-        ListHead::list_del_init(head.clone().unwrap());
-        true_head
+        head
     }
 
 
@@ -313,18 +325,20 @@ impl ListHead {
             }
 
             if bits != 0 {
-                let a = ListHead::new(0);
-                let b = ListHead::new(0);
-                ListHead::list_add_tail(pending.pop().unwrap().clone(), a.clone());
-                ListHead::list_add_tail(pending.pop().unwrap().clone(), b.clone());
+                let a = pending.pop();
+                let b = pending.pop();
 
-                pending.push(ListHead::merge(cmp, Some(b), Some(a)).unwrap().clone());
+                pending.push(ListHead::merge(cmp, b, a).unwrap().clone());
             }
 
             let list_next = list.borrow().next.as_ref().unwrap().clone();
             ListHead::list_del_init(list.clone());
-            println!("item : {}", list.borrow().item);
-            pending.push(list.clone());
+
+            let tmp_head = ListHead::new(-1);
+            ListHead::list_add_tail(list.clone(), tmp_head.clone());
+
+            pending.push(tmp_head.clone());
+
             if Rc::ptr_eq(&head, &list_next) {
                 break;
             }
@@ -333,18 +347,14 @@ impl ListHead {
         }
 
         while pending.len() > 1 {
-            let a = ListHead::new(0);
-            let b = ListHead::new(0);
-            ListHead::list_add_tail(pending.pop().unwrap().clone(), a.clone());
-            ListHead::list_add_tail(pending.pop().unwrap().clone(), b.clone());
+            let a = pending.pop();
+            let b = pending.pop();
 
-            pending.push(ListHead::merge(cmp, Some(b), Some(a)).unwrap().clone());
+            pending.push(ListHead::merge(cmp, b, a).unwrap().clone());
         }
 
         pending.pop()
     }
-
-
 
 }
 
