@@ -1,5 +1,5 @@
 pub mod list;
-use list::ListHead;
+use list::{cmp_func, ListHead};
 
 use std::rc::Rc;
 
@@ -29,4 +29,38 @@ fn main() {
         }
     }
     println!("Finished");
+
+
+    let list1 = ListHead::new(-1);
+    let n1 = ListHead::new(1);
+    let n2 = ListHead::new(2);
+    let n3 = ListHead::new(3);
+
+    ListHead::list_add_tail(n1.clone(), list1.clone());
+    ListHead::list_add_tail(n2.clone(), list1.clone());
+    ListHead::list_add_tail(n3.clone(), list1.clone());
+
+
+    let list2 = ListHead::new(-1);
+    let a1 = ListHead::new(10);
+    let a2 = ListHead::new(11);
+    let a3 = ListHead::new(12);
+
+    ListHead::list_add_tail(a1.clone(), list2.clone());
+    ListHead::list_add_tail(a2.clone(), list2.clone());
+    ListHead::list_add_tail(a3.clone(), list2.clone());
+
+    let list3 = ListHead::merge(cmp_func, Some(list1.clone()), Some(list2.clone()));
+
+    let mut current = Some(Rc::clone(list3.as_ref().unwrap()));
+    while let Some(node) = current {
+        print!("{} -> ", node.borrow().item);
+        current = node.borrow().next.clone();
+        
+        if Rc::ptr_eq(&current.as_ref().unwrap(), list3.as_ref().unwrap()) {
+            break;
+        }
+    }
+    println!("Finished");
+
 }

@@ -3,6 +3,17 @@ use std::{cell::RefCell, cmp::Ordering, rc::Rc};
 type Link<T> = Option<Rc<RefCell<T>>>;
 type ListCmpFunc = fn(&Rc<RefCell<ListHead>>, &Rc<RefCell<ListHead>>) -> Ordering;
 
+
+pub fn cmp_func(n1: &Rc<RefCell<ListHead>>, n2: &Rc<RefCell<ListHead>>) -> Ordering {
+    if n1.borrow().item < n2.borrow().item {
+        Ordering::Less
+    } else if n1.borrow().item > n2.borrow().item {
+        Ordering::Greater
+    } else {
+        Ordering::Equal
+    }
+}
+
 /*TODO: struct members should be private */
 pub struct ListHead {
     pub next: Link<ListHead>,
@@ -107,7 +118,9 @@ impl ListHead {
 
 
     fn __list_del_entry(entry: Rc<RefCell<Self>>) {
-        ListHead::__list_del(entry.borrow().prev.clone().unwrap(), entry.borrow().next.clone().unwrap());
+        if !ListHead::list_empty(entry.clone()) {
+            ListHead::__list_del(entry.borrow().prev.clone().unwrap(), entry.borrow().next.clone().unwrap());
+        }
     }
 
 
@@ -195,6 +208,7 @@ impl ListHead {
     }
 
 
+    /* TODO: fix it */
     fn __list_splice(list: &Rc<RefCell<Self>>, prev: &Rc<RefCell<Self>>, next: &Rc<RefCell<Self>>) {
         list.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(prev));
         prev.borrow_mut().next = Some(Rc::clone(list.borrow().next.as_ref().unwrap()));
@@ -220,9 +234,13 @@ impl ListHead {
      * @list: the new list to add
      * @head: the place to add it in the first list.
      */
-    pub fn list_splice_tail(list: &Rc<RefCell<Self>>, head: &Rc<RefCell<Self>>) {
+    pub fn list_splice_tail(list: Rc<RefCell<Self>>, head: Rc<RefCell<Self>>) {
         if !ListHead::list_empty(list.clone()) {
-            ListHead::__list_splice(list, head.borrow().prev.as_ref().unwrap(), head);
+            list.borrow().next.as_ref().unwrap().borrow_mut().prev = Some(Rc::clone(head.borrow().prev.as_ref().unwrap()));
+            head.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(list.borrow().next.as_ref().unwrap()));
+
+            list.borrow().prev.as_ref().unwrap().borrow_mut().next = Some(Rc::clone(&head.clone()));
+            head.borrow_mut().prev = Some(Rc::clone(list.borrow().prev.as_ref().unwrap()));
         }
     }
 
@@ -231,60 +249,47 @@ impl ListHead {
     pub fn merge(cmp: ListCmpFunc, mut a: Link<Self>, mut b: Link<Self>) -> Link<ListHead> {
         let head = Some(ListHead::new(0));
 
+        let a_next = a.as_ref().unwrap().borrow().next.clone();
+        let b_next = b.as_ref().unwrap().borrow().next.clone();
+        ListHead::list_del_init(a.as_ref().unwrap().clone());
+        ListHead::list_del_init(b.as_ref().unwrap().clone());
+        a = a_next;
+        b = b_next;
+
         loop {
             match (a.clone(), b.clone()) {
-                (Some(ref a_node), Some(ref b_node )) => {
-                    if cmp(a_node, b_node) != Ordering::Greater {
+                (Some(a_node), Some(b_node )) => {
+                    println!("{}, {}", a.as_ref().unwrap().borrow().item, b.as_ref().unwrap().borrow().item);
+
+                    if cmp(&a_node, &b_node) != Ordering::Greater {
                         let a_next = a_node.borrow().next.clone();
-                        let a_prev = a_node.borrow().prev.clone();
-                        
-                        if let Some(next) = a_next.as_ref() {
-                            next.borrow_mut().prev = None;
+                        ListHead::list_move_tail(a_node.clone(), head.as_ref().unwrap().clone());
+                        if Rc::ptr_eq(&a_node, a_next.as_ref().unwrap()) {
+                            a = None;
+                        } else {
+                            a = a_next;
                         }
-                        if let Some(prev) = a_prev.as_ref() {
-                            prev.borrow_mut().next = None;
-                        }
-                        ListHead::list_add_tail(a_node.clone(), head.as_ref().unwrap().clone());
-                        a = a_next.clone();
                     } else {
                         let b_next = b_node.borrow().next.clone();
-                        let b_prev = b_node.borrow().prev.clone();
-
-                        if let Some(next) = b_next.as_ref() {
-                            next.borrow_mut().prev = None;
+                        ListHead::list_move_tail(b_node.clone(), head.as_ref().unwrap().clone());
+                        if Rc::ptr_eq(&b_node, b_next.as_ref().unwrap()) {
+                            b = None;
+                        } else {
+                            b = b_next;
                         }
-                        if let Some(prev) = b_prev.as_ref() {
-                            prev.borrow_mut().next = None;
-                        }
-                        ListHead::list_add_tail(b_node.clone(), head.as_ref().unwrap().clone());
-                        b = b_next.clone();
                     }
                 }
-                (Some(ref a_node), None) => {
-                    let a_next = a_node.borrow().next.clone();
-                    let a_prev = a_node.borrow().prev.clone();
-                    
-                    if let Some(next) = a_next.as_ref() {
-                        next.borrow_mut().prev = None;
-                    }
-                    if let Some(prev) = a_prev.as_ref() {
-                        prev.borrow_mut().next = None;
-                    }
-                    ListHead::list_add_tail(a_node.clone(), head.as_ref().unwrap().clone());
-                    a = a_next.clone();
+                (Some(_), None) => {
+                    let tmp = ListHead::new(-1);
+                    ListHead::list_add(tmp.clone(), a.as_ref().unwrap().clone());
+                    ListHead::list_splice_tail(tmp.clone(), head.as_ref().unwrap().clone());
+                    break;
                 }
-                (None, Some(ref b_node)) => {
-                    let b_next = b_node.borrow().next.clone();
-                    let b_prev = b_node.borrow().prev.clone();
-
-                    if let Some(next) = b_next.as_ref() {
-                        next.borrow_mut().prev = None;
-                    }
-                    if let Some(prev) = b_prev.as_ref() {
-                        prev.borrow_mut().next = None;
-                    }
-                    ListHead::list_add_tail(b_node.clone(), head.as_ref().unwrap().clone());
-                    b = b_next.clone();
+                (None, Some(_)) => {
+                    let tmp = ListHead::new(-1);
+                    ListHead::list_add(tmp.clone(), b.as_ref().unwrap().clone());
+                    ListHead::list_splice_tail(tmp.clone(), head.as_ref().unwrap().clone());
+                    break;
                 }
                 (None, None) => break,
             }
