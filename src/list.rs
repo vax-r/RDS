@@ -259,8 +259,6 @@ impl ListHead {
         loop {
             match (a.clone(), b.clone()) {
                 (Some(a_node), Some(b_node )) => {
-                    println!("{}, {}", a.as_ref().unwrap().borrow().item, b.as_ref().unwrap().borrow().item);
-
                     if cmp(&a_node, &b_node) != Ordering::Greater {
                         let a_next = a_node.borrow().next.clone();
                         ListHead::list_move_tail(a_node.clone(), head.as_ref().unwrap().clone());
@@ -281,13 +279,13 @@ impl ListHead {
                 }
                 (Some(_), None) => {
                     let tmp = ListHead::new(-1);
-                    ListHead::list_add(tmp.clone(), a.as_ref().unwrap().clone());
+                    ListHead::list_add_tail(tmp.clone(), a.as_ref().unwrap().clone());
                     ListHead::list_splice_tail(tmp.clone(), head.as_ref().unwrap().clone());
                     break;
                 }
                 (None, Some(_)) => {
                     let tmp = ListHead::new(-1);
-                    ListHead::list_add(tmp.clone(), b.as_ref().unwrap().clone());
+                    ListHead::list_add_tail(tmp.clone(), b.as_ref().unwrap().clone());
                     ListHead::list_splice_tail(tmp.clone(), head.as_ref().unwrap().clone());
                     break;
                 }
@@ -299,6 +297,54 @@ impl ListHead {
         ListHead::list_del_init(head.clone().unwrap());
         true_head
     }
+
+
+    pub fn list_sort(head: Rc<RefCell<Self>>, cmp: ListCmpFunc) -> Option<Rc<RefCell<ListHead>>> {
+        let mut count = 0;
+
+        let mut list = head.borrow().next.as_ref().unwrap().clone();
+        let mut pending: Vec<Rc<RefCell<ListHead>>>= Vec::new();
+
+        loop {
+            let mut bits = count;
+
+            while bits & 1 == 1 {
+                bits >>= 1;
+            }
+
+            if bits != 0 {
+                let a = ListHead::new(0);
+                let b = ListHead::new(0);
+                ListHead::list_add_tail(pending.pop().unwrap().clone(), a.clone());
+                ListHead::list_add_tail(pending.pop().unwrap().clone(), b.clone());
+
+                pending.push(ListHead::merge(cmp, Some(b), Some(a)).unwrap().clone());
+            }
+
+            let list_next = list.borrow().next.as_ref().unwrap().clone();
+            ListHead::list_del_init(list.clone());
+            println!("item : {}", list.borrow().item);
+            pending.push(list.clone());
+            if Rc::ptr_eq(&head, &list_next) {
+                break;
+            }
+            list = list_next;
+            count += 1;
+        }
+
+        while pending.len() > 1 {
+            let a = ListHead::new(0);
+            let b = ListHead::new(0);
+            ListHead::list_add_tail(pending.pop().unwrap().clone(), a.clone());
+            ListHead::list_add_tail(pending.pop().unwrap().clone(), b.clone());
+
+            pending.push(ListHead::merge(cmp, Some(b), Some(a)).unwrap().clone());
+        }
+
+        pending.pop()
+    }
+
+
 
 }
 

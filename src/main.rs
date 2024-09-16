@@ -63,4 +63,27 @@ fn main() {
     }
     println!("Finished");
 
+
+    let list4 = ListHead::new(-1);
+    let l1 = ListHead::new(10);
+    let l2 = ListHead::new(1);
+    let l3 = ListHead::new(22);
+
+    ListHead::list_add_tail(l1.clone(), list4.clone());
+    ListHead::list_add_tail(l2.clone(), list4.clone());
+    ListHead::list_add_tail(l3.clone(), list4.clone());
+
+    let list5 = ListHead::list_sort(list4.clone(), cmp_func);
+
+    let mut current = Some(Rc::clone(list5.as_ref().unwrap()));
+    while let Some(node) = current {
+        print!("{} -> ", node.borrow().item);
+        current = node.borrow().next.clone();
+        
+        if Rc::ptr_eq(&current.as_ref().unwrap(), list5.as_ref().unwrap()) {
+            break;
+        }
+    }
+    println!("Finished");
+
 }
