@@ -7,6 +7,8 @@ name = "RDS"
 version = "0.1.0"
 dependencies = [
  "rand",
+ "sorted-vec",
+ "sortedvec",
 ]
 
 [[package]]
@@ -94,6 +96,18 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
+
+[[package]]
+name = "sorted-vec"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6734caf0b6f51addd5eeacca12fb39b2c6c14e8d4f3ac42f3a78955c0467458"
+
+[[package]]
+name = "sortedvec"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5bef4346ba87965286c2167a1857add80c8aabed16e021ddb23c493793fc4f59"
 
 [[package]]
 name = "syn"

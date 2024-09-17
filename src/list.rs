@@ -362,6 +362,9 @@ impl ListHead {
 /* Sections for Unit tests */
 #[cfg(test)]
 mod tests {
+    use sorted_vec::SortedVec;
+    use rand::Rng;
+
     use super::*;
 
     #[test]
@@ -543,5 +546,54 @@ mod tests {
         assert!(ListHead::list_empty(list1.clone()));
         assert!(Rc::ptr_eq(&b, list2.borrow().next.as_ref().unwrap()));
         assert!(Rc::ptr_eq(&a, b.borrow().next.as_ref().unwrap()));
+    }
+
+
+    #[test]
+    fn test_list_sort() {
+        let mut rng = rand::thread_rng();
+        let mut map = SortedVec::new();
+        let list = ListHead::new(-1);
+
+        for _ in 0..100 {
+            let num: i32 = rng.gen();
+            map.insert(num);
+            let node = ListHead::new(num);
+            ListHead::list_add_tail(node.clone(), list.clone());
+        }
+
+        let sorted_list = ListHead::list_sort(list.clone(), cmp_func);
+
+
+        let mut i: usize = 0;
+        let mut current = sorted_list.as_ref().unwrap().borrow().next.clone();
+        while let Some(node) = current {
+            assert_eq!(map[i], node.borrow().item);
+
+            current = node.borrow().next.clone();
+            i += 1;
+            if Rc::ptr_eq(current.as_ref().unwrap(), &sorted_list.as_ref().unwrap()) {
+                break;
+            }
+        }
+
+        assert_eq!(i, 100);
+
+        i = 99;
+        current = sorted_list.as_ref().unwrap().borrow().prev.clone();
+        while let Some(node) = current {
+            assert_eq!(map[i], node.borrow().item);
+
+            current = node.borrow().prev.clone();
+
+            if i != 0 {
+                i -= 1;
+            }
+            if Rc::ptr_eq(current.as_ref().unwrap(), &sorted_list.as_ref().unwrap()) {
+                break;
+            }
+        }
+
+        assert_eq!(i, 0);
     }
 }
