@@ -1,10 +1,21 @@
 use std::{cell::RefCell, cmp::Ordering, rc::Rc};
+use std::mem::offset_of;
 
 type Link<T> = Option<Rc<RefCell<T>>>;
-type ListCmpFunc = fn(&Rc<RefCell<ListHead>>, &Rc<RefCell<ListHead>>) -> Ordering;
+type ListCmpFunc = fn(Rc<RefCell<ListHead>>, Rc<RefCell<ListHead>>) -> Ordering;
 
 
-pub fn cmp_func(n1: &Rc<RefCell<ListHead>>, n2: &Rc<RefCell<ListHead>>) -> Ordering {
+#[macro_export]
+macro_rules! container_of {
+    ($ptr:expr, $type:ty, $member:ident) => {{
+        let offset = offset_of!($type, $member);
+        let ptr = ($ptr as *const _ as *const u8).wrapping_sub(offset);
+        ptr as *const $type as *mut $type
+    }};
+}
+
+
+pub fn cmp_func(n1: Rc<RefCell<ListHead>>, n2: Rc<RefCell<ListHead>>) -> Ordering {
     if n1.borrow().item < n2.borrow().item {
         Ordering::Less
     } else if n1.borrow().item > n2.borrow().item {
@@ -13,6 +24,22 @@ pub fn cmp_func(n1: &Rc<RefCell<ListHead>>, n2: &Rc<RefCell<ListHead>>) -> Order
         Ordering::Equal
     }
 }
+
+
+pub struct ExampleNode {
+    pub item: i32,
+    pub list_node: Rc<RefCell<ListHead>>,
+}
+
+impl ExampleNode {
+    pub fn new(num: i32) -> Self {
+        ExampleNode{
+            item: num,
+            list_node: ListHead::new(num),
+        }
+    }
+}
+
 
 /*TODO: struct members should be private */
 pub struct ListHead {
@@ -273,7 +300,7 @@ impl ListHead {
         loop {
             match (a.clone(), b.clone()) {
                 (Some(a_node), Some(b_node )) => {
-                    if cmp(&a_node, &b_node) != Ordering::Greater {
+                    if cmp(a_node.clone(), b_node.clone()) != Ordering::Greater {
                         let a_next = a_node.borrow().next.clone();
                         ListHead::list_move_tail(a_node.clone(), head.as_ref().unwrap().clone());
                         if Rc::ptr_eq(&a_node, a_next.as_ref().unwrap()) {
