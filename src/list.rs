@@ -41,11 +41,10 @@ impl ExampleNode {
 }
 
 
-/*TODO: struct members should be private */
 pub struct ListHead {
-    pub next: Link<ListHead>,
-    pub prev: Link<ListHead>,
-    pub item: i32,
+    next: Link<ListHead>,
+    prev: Link<ListHead>,
+    item: i32,
 }
 
 impl ListHead {
