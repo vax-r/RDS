@@ -1,0 +1,8 @@
+[package]
+name = "sync"
+version = "0.1.0"
+edition = "2025"
+authors = ["I Hsin Cheng <richard120310@gmail.com>"]
+description = "User-space synchronization primitives from Rust for Linux"
+
+[dependencies]
