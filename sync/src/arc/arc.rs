@@ -1,4 +1,48 @@
 pub use std::sync::Arc;
+use std::{
+    ops::{Deref, DerefMut},
+};
+use std::alloc::AllocError;
+
+/// A refcounted object that is known to have a refcount of 1.
+///
+/// It is mutable and can be converted to an [`Arc`] so that it can be shared.
+///
+/// # Invariants
+///
+/// `inner` always has a reference count of 1.
+pub struct UniqueArc<T: ?Sized> {
+    inner: Arc<T>,
+}
+
+
+impl<T> UniqueArc<T> {
+    /// Tries to allocate a new [`UniqueArc`] instance.
+    #[allow(dead_code)]
+    pub fn new(value: T) -> Result<Self, AllocError> {
+        Ok(Self {
+            // INVARIANT: THe newly-created object has a ref-count of 1.
+            inner: Arc::try_new(value)?,
+        })
+    }
+}
+
+impl<T: ?Sized> Deref for UniqueArc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner.deref()
+    }
+}
+
+impl<T: ?Sized> DerefMut for UniqueArc<T> {
+    // SAFETY: By the `Arc` type invariant, there is necessarily a reference to the object, so
+    // it is safe to dereference it. Additionally, we know there is only one reference when
+    // it's inside a `UniqueArc`, so it is safe to get a mutable reference.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Arc::get_mut(&mut self.inner).unwrap()
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -32,6 +76,24 @@ mod tests {
         // or "Weak" haven't been shared between threads.
         assert_eq!(Arc::strong_count(&data), 1);
         assert_eq!(Arc::weak_count(&data), 1);
+    }
+
+    #[test]
+    fn test_unique_arc_new() {
+
+        struct MockData {
+            a: u32,
+            b: u32,
+        }
+
+        let mut x = UniqueArc::new(MockData { a: 10, b: 20}).unwrap();
+        assert_eq!(x.a, 10);
+        assert_eq!(x.b, 20);
+
+        x.a += 1;
+        x.b += 1;
+        assert_eq!(x.a, 11);
+        assert_eq!(x.b, 21);
     }
 }
 
