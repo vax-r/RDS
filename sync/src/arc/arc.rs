@@ -3,6 +3,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 use std::alloc::AllocError;
+use std::mem::MaybeUninit;
 
 /// A refcounted object that is known to have a refcount of 1.
 ///
@@ -23,6 +24,17 @@ impl<T> UniqueArc<T> {
         Ok(Self {
             // INVARIANT: THe newly-created object has a ref-count of 1.
             inner: Arc::try_new(value)?,
+        })
+    }
+
+    /// Tries to allocate a new [`UniqueArc`] instance whose contents are not initialised yet.
+    #[allow(dead_code)]
+    pub fn new_uninit() -> Result<UniqueArc<MaybeUninit<T>>, AllocError> {
+        // INVARIANT: The refcount is initialised to a non-zero value.
+        let inner_arc = Arc::<T>::try_new_uninit()?;
+
+        Ok(UniqueArc::<MaybeUninit<T>> {
+            inner: inner_arc,
         })
     }
 }
@@ -94,6 +106,18 @@ mod tests {
         x.b += 1;
         assert_eq!(x.a, 11);
         assert_eq!(x.b, 21);
+    }
+
+    #[test]
+    fn test_unique_arc_new_uninit() {
+        #[allow(dead_code)]
+        struct MockData {
+            a: u32,
+            b: u32,
+        }
+
+        let x = UniqueArc::<MockData>::new_uninit().unwrap();
+        assert_eq!(Arc::strong_count(&x.inner), 1);
     }
 }
 
