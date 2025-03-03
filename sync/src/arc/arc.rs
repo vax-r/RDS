@@ -39,6 +39,30 @@ impl<T> UniqueArc<T> {
     }
 }
 
+impl<T> UniqueArc<MaybeUninit<T>> {
+    /// Converts a `UniqueArc<MaybeUninit<T>>` into a `UniqueArc<T>` by writing a value into it.
+    #[allow(dead_code)]
+    pub fn write(mut self, value: T) -> UniqueArc<T> {
+        Arc::get_mut(&mut self.inner).unwrap().write(value);
+        // SAFETY: We just wrote the value to be initialised.
+        unsafe { self.assume_init() }
+    }
+
+    /// Unsafely assume that `self` is initialized.
+    ///
+    /// # Safety
+    ///
+    /// The caller guarantees that the value behind this pointer has been initialized. It is
+    /// *immediate* UB to call this when the value is not initialized.
+    #[allow(dead_code)]
+    pub unsafe fn assume_init(self) -> UniqueArc<T> {
+        let inner = unsafe { self.inner.assume_init() };
+        UniqueArc {
+            inner: Arc::from_raw(Arc::into_raw(inner) as *const T),
+        }
+    }
+}
+
 impl<T: ?Sized> Deref for UniqueArc<T> {
     type Target = T;
 
@@ -118,6 +142,20 @@ mod tests {
 
         let x = UniqueArc::<MockData>::new_uninit().unwrap();
         assert_eq!(Arc::strong_count(&x.inner), 1);
+    }
+
+    // FIXME : assume_init() doesn't triggered the UB even if the value isn't initialized
+    // explicitly.
+    #[test]
+    fn test_unique_arc_write() {
+        struct MockData {
+            a: u32,
+        }
+
+        let x = unsafe { UniqueArc::<MockData>::new_uninit().unwrap() };
+        let y = x.write(MockData{a: 10});
+
+        assert_eq!(y.a, 10);
     }
 }
 
